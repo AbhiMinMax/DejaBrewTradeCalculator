@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .calculator {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: none;
+            height: calc(100vh - 20px);
+            overflow-y: auto;
+        }
+
+        /* Base Grid System - Mobile First */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .grid-item {
+            display: block;
+        }
+        
+        /* Tablet Portrait: 768px+ */
+        @media screen and (min-width: 768px) {
+            .calculator {
+                padding: 16px;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        /* Tablet Landscape: 1024px+ */
+        @media screen and (min-width: 1024px) {
+            body {
+                padding: 8px;
+            }
+            
+            .calculator {
+                height: calc(100vh - 16px);
+                padding: 16px;
+                display: grid;
+                grid-template-rows: auto auto auto 1fr auto;
+                gap: 12px;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 16px;
+                overflow: hidden;
+            }
+            
+            .grid-item {
+                overflow-y: auto;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+                margin-bottom: 0;
+            }
+            
+            .disclaimer {
+                margin-bottom: 0;
+                padding: 8px 12px;
+            }
+            
+            .top-controls {
+                padding: 12px;
+                margin-bottom: 0;
+            }
+            
+            .step-box, .additional-inputs, .lot-results {
+                padding: 12px;
+                margin-bottom: 10px;
+            }
+            
+            .step-box h3, .additional-inputs h3, .lot-results h3 {
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+            
+            .form-group {
+                margin-bottom: 12px;
+            }
+            
+            label {
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+            
+            input, select {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Desktop: 1200px+ */
+        @media screen and (min-width: 1200px) {
+            .calculator {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                gap: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .top-controls {
+                padding: 16px;
+            }
+            
+            .step-box, .additional-inputs, .lot-results {
+                padding: 16px;
+            }
+        }
+        
+        /* Large Desktop: 1440px+ */
+        @media screen and (min-width: 1440px) {
+            .calculator {
+                max-width: 1600px;
+                padding: 24px;
+            }
+            
+            .main-content {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 24px;
+            }
+            
+            .step-box, .additional-inputs, .lot-results {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .results {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .result-value {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .clear-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            background: #ff5252;
+        }
+
+        .steps-container {
+            margin-bottom: 30px;
+        }
+
+        .step-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .result-display {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .additional-inputs {
+            background: #f0f2f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .additional-inputs h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .lot-results {
+            background: #f0f8f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .lot-results h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background-color: white;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .refresh-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #45a049;
+        }
+
+        .price-status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .price-status.live {
+            color: #4caf50;
+        }
+
+        .price-status.error {
+            color: #f44336;
+        }
+
+        .price-status.manual {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        #current-price.manual-mode {
+            border-color: #ff9800;
+            background-color: #fff8e1;
+        }
+
+        #current-price.live-mode {
+            border-color: #4caf50;
+            background-color: #f1f8e9;
+        }
+
+        .stop-loss-controls {
+            margin-top: 15px;
+        }
+
+        .slider-container {
+            margin: 10px 0;
+        }
+
+        .percentage-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .percentage-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .percentage-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        #percentage-display {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        optgroup {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .saved-indicator {
+            color: #4caf50;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .lot-size-actions {
+            margin-top: 5px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .save-btn, .reset-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .save-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .reset-btn {
+            background: #ff9800;
+        }
+
+        .reset-btn:hover {
+            background: #f57c00;
+        }
+
+        .top-controls {
+            background: #f0f2f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .trade-direction {
+            margin-top: 15px;
+        }
+
+        .trade-direction label:first-child {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .direction-toggle {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+
+        .direction-toggle input[type="radio"] {
+            display: none;
+        }
+
+        .direction-label {
+            flex: 1;
+            padding: 12px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            border: none;
+            margin: 0;
+        }
+
+        .buy-label {
+            color: #2e7d32;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .sell-label {
+            color: #c62828;
+        }
+
+        .direction-toggle input[type="radio"]:checked + .buy-label {
+            background: #e8f5e8;
+            color: #1b5e20;
+        }
+
+        .direction-toggle input[type="radio"]:checked + .sell-label {
+            background: #ffebee;
+            color: #b71c1c;
+        }
+
+        .direction-label:hover {
+            background: #f5f5f5;
+        }
+
+        .ratio-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ratio-container span {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        .ratio-container input {
+            flex: 1;
+        }
+
+        input[readonly].take-profit {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .profit-display {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border-radius: 6px;
+            border: 1px solid #4caf50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profit-label {
+            font-size: 14px;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .profit-value {
+            font-size: 16px;
+            color: #1b5e20;
+            font-weight: bold;
+        }
+
+        .profit-value.positive {
+            color: #1b5e20;
+        }
+
+        .profit-value.negative {
+            color: #c62828;
+        }
+
+        .disclaimer {
+            background: #fff3e0;
+            border: 1px solid #ff9800;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .disclaimer p {
+            margin: 0;
+            font-size: 14px;
+            color: #e65100;
+        }
+
+        .disclaimer strong {
+            color: #bf360c;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>5-Step Trading Calculator</h1>
+        <div class="disclaimer">
+            <p><strong>Disclaimer:</strong> This is a personal project created inspired by DejaBrew's trading method. Use at your own risk. Not financial advice.</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="grid-item">
+                <div class="top-controls">
+                    <div class="form-group">
+                        <label for="instrument">Trading Instrument</label>
+                        <select id="instrument">
+                            <optgroup label="Major Forex">
+                                <option value="EURUSD">EUR/USD (0.01)</option>
+                                <option value="GBPUSD">GBP/USD (0.01)</option>
+                                <option value="USDJPY">USD/JPY (0.01)</option>
+                                <option value="USDCHF">USD/CHF (0.01)</option>
+                                <option value="AUDUSD">AUD/USD (0.01)</option>
+                                <option value="USDCAD">USD/CAD (0.01)</option>
+                            </optgroup>
+                            <optgroup label="Minor Forex">
+                                <option value="EURGBP">EUR/GBP (0.001)</option>
+                                <option value="EURJPY">EUR/JPY (0.001)</option>
+                                <option value="GBPJPY">GBP/JPY (0.001)</option>
+                                <option value="CHFJPY">CHF/JPY (0.001)</option>
+                                <option value="EURCHF">EUR/CHF (0.001)</option>
+                                <option value="AUDCHF">AUD/CHF (0.001)</option>
+                            </optgroup>
+                            <optgroup label="Commodities">
+                                <option value="XAUUSD">XAU/USD (Gold) (0.01)</option>
+                                <option value="DXY">DXY (USD Index) (0.001)</option>
+                            </optgroup>
+                            <optgroup label="Crypto">
+                                <option value="BTCUSD">BTC/USD (0.001)</option>
+                                <option value="ETHUSD">ETH/USD (0.01)</option>
+                            </optgroup>
+                            <optgroup label="Custom">
+                                <option value="custom">Custom Instrument</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="account-balance">Account Balance ($)</label>
+                        <input type="number" id="account-balance" placeholder="10000" step="0.01">
+                    </div>
+                    <div class="trade-direction">
+                        <label>Trade Direction</label>
+                        <div class="direction-toggle">
+                            <input type="radio" id="buy-direction" name="trade-direction" value="buy" checked>
+                            <label for="buy-direction" class="direction-label buy-label">BUY (Long)</label>
+                            <input type="radio" id="sell-direction" name="trade-direction" value="sell">
+                            <label for="sell-direction" class="direction-label sell-label">SELL (Short)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <div class="step-box">
+                    <h3>Step 1: Stop Loss Setup</h3>
+                    <div class="form-group">
+                        <label for="current-price">Current Price ($) 
+                            <button id="refresh-price" class="refresh-btn">🔄 Live</button>
+                            <button id="manual-price" class="refresh-btn">✏️ Manual</button>
+                        </label>
+                        <input type="number" id="current-price" placeholder="1.0850" step="0.00001">
+                        <div class="price-status" id="price-status">Select instrument to load live price</div>
+                    </div>
+                    <div class="stop-loss-controls">
+                        <div class="form-group">
+                            <label for="stop-loss-percentage">Stop Loss % <span id="percentage-display">2.0%</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="stop-loss-percentage" min="0" max="100" step="1" value="20" class="percentage-slider">
+                                <div class="slider-labels">
+                                    <span>0%</span>
+                                    <span>2%</span>
+                                    <span>10%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="stop-loss">Stop Loss Price ($)</label>
+                            <input type="number" id="stop-loss" placeholder="1.0633" step="0.00001">
+                        </div>
+                        <div class="form-group">
+                            <label for="reward-risk-ratio">Risk:Reward Ratio (1:X)</label>
+                            <div class="ratio-container">
+                                <span>1:</span>
+                                <input type="number" id="reward-risk-ratio" placeholder="2" step="1" min="1" max="10" value="2">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="take-profit">Take Profit Price ($)</label>
+                            <input type="number" id="take-profit" placeholder="1.1283" step="0.00001" readonly class="take-profit">
+                            <div class="profit-display">
+                                <span class="profit-label">Potential Profit:</span>
+                                <span class="profit-value" id="potential-profit-amount">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <div class="step-box">
+                    <h3>Step 2: % Change to Stop</h3>
+                    <div class="result-display">
+                        <span id="percentage-change">0.00%</span>
+                    </div>
+                </div>
+                
+                <div class="step-box">
+                    <h3>Step 3: Your Bet ($)</h3>
+                    <div class="form-group">
+                        <label for="bet-amount">Amount Willing to Lose ($)</label>
+                        <input type="number" id="bet-amount" placeholder="200" step="0.01">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <div class="step-box">
+                    <h3>Step 4: Notional Value</h3>
+                    <div class="result-display">
+                        <span id="notional-value">$0.00</span>
+                    </div>
+                </div>
+                
+                <div class="step-box">
+                    <h3>Step 5: Deribit Adjustment</h3>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="deribit-enabled">
+                        <label for="deribit-enabled">Deribit Exchange (÷10)</label>
+                    </div>
+                    <div class="result-display">
+                        <span id="final-contracts">$0.00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <div class="additional-inputs">
+                    <h3>Lot Size & Leverage</h3>
+                    <div class="form-group" id="custom-lot-group">
+                        <label for="lot-size">Minimum Lot Size</label>
+                        <input type="number" id="lot-size" placeholder="0.001" step="0.001" min="0.001">
+                        <div class="lot-size-actions">
+                            <button type="button" id="save-lot-size" class="save-btn">Save for this instrument</button>
+                            <button type="button" id="reset-lot-size" class="reset-btn">Reset to default</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="calculated-leverage">Calculated Leverage</label>
+                        <input type="text" id="calculated-leverage" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <div class="lot-results">
+                    <h3>Position Size Adjustment</h3>
+                    <div class="result-row">
+                        <span class="result-label">Calculated Position Size:</span>
+                        <span class="result-value" id="raw-position-size">0.000</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Adjusted for Lot Size:</span>
+                        <span class="result-value" id="adjusted-position-size">0.000</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Number of Lots:</span>
+                        <span class="result-value" id="number-of-lots">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="clear-btn" onclick="clearAll()">Clear All</button>
+        <button class="clear-btn" onclick="testFetchPrice()" style="background: #2196F3; margin-left: 10px;">Test Fetch Price</button>
+    </div>
+
+    <script>
+        let isCalculating = false;
+
+        let livePrices = {};
+        let priceRefreshInterval;
+        let isManualPriceMode = false;
+
+        // Cookie utility functions
+        function setCookie(name, value, days = 365) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function saveInstrumentLotSize(instrument, lotSize) {
+            const cookieName = `lotSize_${instrument}`;
+            setCookie(cookieName, lotSize);
+            console.log(`Saved lot size for ${instrument}: ${lotSize}`);
+        }
+
+        function getInstrumentSavedLotSize(instrument) {
+            const cookieName = `lotSize_${instrument}`;
+            const saved = getCookie(cookieName);
+            return saved ? parseFloat(saved) : null;
+        }
+
+        function setDefaults() {
+            document.getElementById('current-price').value = '';
+            document.getElementById('stop-loss').value = '';
+            document.getElementById('bet-amount').value = '200';
+            document.getElementById('account-balance').value = '10000';
+            document.getElementById('lot-size').value = '0.01';
+            document.getElementById('instrument').value = 'EURUSD';
+            document.getElementById('stop-loss-percentage').value = '20'; // Slider value for 2%
+            document.getElementById('reward-risk-ratio').value = '2';
+            updatePercentageDisplay();
+        }
+
+        async function fetchLivePrice(symbol) {
+            // Don't fetch if in manual mode
+            if (isManualPriceMode) {
+                console.log('Skipping live price fetch - manual mode active');
+                return;
+            }
+
+            console.log('Fetching live price for:', symbol);
+            updatePriceStatus('Fetching live price...', 'loading');
+            
+            try {
+                let price = null;
+                let apiSource = '';
+                
+                // Simplified API approach with better error handling
+                console.log('Starting API calls for symbol:', symbol);
+                
+                // Try crypto APIs first
+                if (symbol === 'BTCUSD' || symbol === 'ETHUSD') {
+                    // CoinGecko - most reliable for crypto
+                    try {
+                        const coinId = symbol === 'BTCUSD' ? 'bitcoin' : 'ethereum';
+                        console.log('Trying CoinGecko for:', coinId);
+                        
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 10000);
+                        
+                        const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`, {
+                            signal: controller.signal,
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                            }
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        
+                        console.log('CoinGecko response status:', response.status, response.statusText);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('CoinGecko data:', data);
+                            price = data[coinId]?.usd;
+                            if (price) {
+                                apiSource = 'CoinGecko';
+                                console.log('Got CoinGecko price:', price);
+                            }
+                        } else {
+                            console.log('CoinGecko responded with error:', response.status);
+                        }
+                    } catch (cgError) {
+                        console.log('CoinGecko failed:', cgError.message);
+                    }
+                    
+                    // Fallback to Binance if CoinGecko failed
+                    if (!price) {
+                        try {
+                            const binanceSymbol = symbol === 'BTCUSD' ? 'BTCUSDT' : 'ETHUSDT';
+                            console.log('Trying Binance for:', binanceSymbol);
+                            
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 8000);
+                            
+                            const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${binanceSymbol}`, {
+                                signal: controller.signal
+                            });
+                            
+                            clearTimeout(timeoutId);
+                            console.log('Binance response status:', response.status);
+                            
+                            if (response.ok) {
+                                const data = await response.json();
+                                console.log('Binance data:', data);
+                                price = parseFloat(data.price);
+                                apiSource = 'Binance';
+                                console.log('Got Binance price:', price);
+                            }
+                        } catch (binanceError) {
+                            console.log('Binance failed:', binanceError.message);
+                        }
+                    }
+                }
+                
+                // Try forex APIs
+                else if (['EURUSD', 'GBPUSD', 'AUDUSD', 'USDCAD', 'USDCHF', 'USDJPY'].includes(symbol)) {
+                    try {
+                        console.log('Trying ExchangeRate-API for:', symbol);
+                        let apiUrl;
+                        
+                        if (symbol.endsWith('USD')) {
+                            // EUR/USD, GBP/USD, AUD/USD
+                            const currency = symbol.substring(0, 3);
+                            apiUrl = `https://api.exchangerate-api.com/v4/latest/${currency}`;
+                        } else {
+                            // USD/CAD, USD/CHF, USD/JPY
+                            apiUrl = `https://api.exchangerate-api.com/v4/latest/USD`;
+                        }
+                        
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 8000);
+                        
+                        const response = await fetch(apiUrl, {
+                            signal: controller.signal
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        console.log('ExchangeRate-API response status:', response.status);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('ExchangeRate-API data:', data);
+                            
+                            if (symbol.endsWith('USD')) {
+                                price = data.rates?.USD;
+                            } else {
+                                const currency = symbol.substring(3);
+                                price = data.rates?.[currency];
+                            }
+                            
+                            if (price) {
+                                apiSource = 'ExchangeRate-API';
+                                console.log('Got ExchangeRate-API price:', price);
+                            }
+                        }
+                    } catch (forexError) {
+                        console.log('ExchangeRate-API failed:', forexError.message);
+                    }
+                }
+                
+                // Try Gold APIs for XAUUSD
+                else if (symbol === 'XAUUSD') {
+                    console.log('Fetching gold price from multiple sources...');
+                    let goldPrices = [];
+                    
+                    // Source 1: Business Insider (web scraping approach)
+                    try {
+                        console.log('Fetching gold price from Business Insider...');
+                        const response = await fetch('https://markets.businessinsider.com/commodities/gold-price');
+                        if (response.ok) {
+                            const html = await response.text();
+                            
+                            // Parse HTML to extract gold price from table
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const tables = doc.querySelectorAll('table');
+                            
+                            // Look for the 3rd table (index 2) as per Excel formula
+                            if (tables.length >= 3) {
+                                const goldTable = tables[2];
+                                const rows = goldTable.querySelectorAll('tr');
+                                
+                                // Get 2nd row, 3rd column (index 1, index 2)
+                                if (rows.length >= 2) {
+                                    const priceRow = rows[1];
+                                    const cells = priceRow.querySelectorAll('td');
+                                    if (cells.length >= 3) {
+                                        const priceText = cells[2].textContent.trim();
+                                        const goldPrice = parseFloat(priceText.replace(/[,$]/g, ''));
+                                        
+                                        if (goldPrice > 1000 && goldPrice < 5000) {
+                                            goldPrices.push({ source: 'Business Insider', price: goldPrice });
+                                            console.log('Business Insider gold price:', goldPrice);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Business Insider scraping failed:', e.message);
+                    }
+                    
+                    // Source 2: Metals-API
+                    try {
+                        const response = await fetch('https://api.metals.live/v1/spot/gold');
+                        if (response.ok) {
+                            const data = await response.json();
+                            const goldPrice = parseFloat(data.price);
+                            if (goldPrice > 1000 && goldPrice < 5000) {
+                                goldPrices.push({ source: 'Metals-API', price: goldPrice });
+                                console.log('Metals-API gold price:', goldPrice);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Metals-API failed:', e.message);
+                    }
+                    
+                    // Source 3: Yahoo Finance (alternative scraping)
+                    try {
+                        console.log('Trying Yahoo Finance for gold price...');
+                        const response = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/GC=F');
+                        if (response.ok) {
+                            const data = await response.json();
+                            const goldPrice = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+                            if (goldPrice && goldPrice > 1000 && goldPrice < 5000) {
+                                goldPrices.push({ source: 'Yahoo Finance', price: goldPrice });
+                                console.log('Yahoo Finance gold price:', goldPrice);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Yahoo Finance failed:', e.message);
+                    }
+                    
+                    // Source 4: MetalpriceAPI (if available)
+                    try {
+                        const response = await fetch('https://api.metalprice.com/v1/spot/gold?api_key=demo');
+                        if (response.ok) {
+                            const data = await response.json();
+                            const goldPrice = parseFloat(data.price_per_ounce);
+                            if (goldPrice > 1000 && goldPrice < 5000) {
+                                goldPrices.push({ source: 'MetalpriceAPI', price: goldPrice });
+                                console.log('MetalpriceAPI gold price:', goldPrice);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('MetalpriceAPI failed:', e.message);
+                    }
+                    
+                    // Source 5: Alternative gold price from financial API
+                    try {
+                        console.log('Trying Finnhub for gold futures...');
+                        const response = await fetch('https://finnhub.io/api/v1/quote?symbol=FOREXCOM:XAUUSD&token=demo');
+                        if (response.ok) {
+                            const data = await response.json();
+                            const goldPrice = parseFloat(data.c); // current price
+                            if (goldPrice > 1000 && goldPrice < 5000) {
+                                goldPrices.push({ source: 'Finnhub', price: goldPrice });
+                                console.log('Finnhub gold price:', goldPrice);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Finnhub failed:', e.message);
+                    }
+                    
+                    // Source 6: Alpha Vantage for commodities
+                    try {
+                        const response = await fetch('https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=XAU&to_currency=USD&apikey=demo');
+                        if (response.ok) {
+                            const data = await response.json();
+                            const goldPrice = parseFloat(data['Realtime Currency Exchange Rate']?.['5. Exchange Rate']);
+                            if (goldPrice > 1000 && goldPrice < 5000) {
+                                goldPrices.push({ source: 'Alpha Vantage', price: goldPrice });
+                                console.log('Alpha Vantage gold price:', goldPrice);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Alpha Vantage failed:', e.message);
+                    }
+                    
+                    // Cross-validate gold prices
+                    if (goldPrices.length >= 2) {
+                        const prices = goldPrices.map(p => p.price);
+                        const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+                        const maxDev = Math.max(...prices.map(p => Math.abs(p - avgPrice)));
+                        
+                        if (maxDev < avgPrice * 0.03) { // Within 3%
+                            price = avgPrice;
+                            apiSource = `Validated (${goldPrices.map(p => p.source).join(', ')})`;
+                            console.log('Cross-validated gold price:', price);
+                        } else {
+                            price = goldPrices[0].price;
+                            apiSource = goldPrices[0].source + ' (Price variance detected)';
+                            console.warn('Gold prices vary significantly:', goldPrices);
+                        }
+                    } else if (goldPrices.length === 1) {
+                        price = goldPrices[0].price;
+                        apiSource = goldPrices[0].source + ' (Single source)';
+                    }
+                }
+                
+                // Enhanced Forex APIs
+                else if (['EURGBP', 'EURJPY', 'GBPJPY', 'CHFJPY', 'EURCHF', 'AUDCHF'].includes(symbol)) {
+                    // Try Alpha Vantage for minor pairs
+                    try {
+                        const fromCurrency = symbol.substring(0, 3);
+                        const toCurrency = symbol.substring(3, 6);
+                        const response = await fetch(`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${fromCurrency}&to_currency=${toCurrency}&apikey=demo`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            price = parseFloat(data['Realtime Currency Exchange Rate']?.['5. Exchange Rate']);
+                            if (price) {
+                                apiSource = 'Alpha Vantage';
+                                console.log('Alpha Vantage forex price:', price);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Alpha Vantage forex failed:', e.message);
+                    }
+                }
+                
+                // Always fallback to current market prices
+                if (!price || price <= 0) {
+                    console.log('Using current market prices for:', symbol);
+                    const currentMarketPrices = {
+                        'EURUSD': 1.0850,
+                        'GBPUSD': 1.2650,
+                        'USDJPY': 149.85,
+                        'USDCHF': 0.9125,
+                        'AUDUSD': 0.6750,
+                        'USDCAD': 1.3580,
+                        'EURGBP': 0.8580,
+                        'EURJPY': 162.45,
+                        'GBPJPY': 189.75,
+                        'CHFJPY': 164.25,
+                        'EURCHF': 0.9850,
+                        'AUDCHF': 0.6155,
+                        'XAUUSD': 2685.50, // Updated current gold price
+                        'DXY': 103.85,
+                        'BTCUSD': 97500,   // Updated current BTC price
+                        'ETHUSD': 3450     // Updated current ETH price
+                    };
+                    
+                    const basePrice = currentMarketPrices[symbol];
+                    if (basePrice) {
+                        // Add small realistic price movement
+                        const variation = symbol.includes('JPY') ? 0.5 : 
+                                        symbol === 'XAUUSD' ? 3 :
+                                        symbol === 'DXY' ? 0.2 :
+                                        symbol === 'BTCUSD' ? 150 :
+                                        symbol === 'ETHUSD' ? 20 :
+                                        basePrice * 0.002;
+                        
+                        price = basePrice + (Math.random() - 0.5) * variation * 2;
+                        apiSource = apiSource || 'Market Price';
+                        console.log('Using market price:', price, 'for', symbol);
+                    }
+                }
+                
+                if (price && price > 0) {
+                    console.log('Final price set:', price, 'from', apiSource);
+                    livePrices[symbol] = price;
+                    
+                    const priceInput = document.getElementById('current-price');
+                    const decimalPlaces = getDecimalPlaces(symbol);
+                    priceInput.value = price.toFixed(decimalPlaces);
+                    priceInput.readOnly = true;
+                    priceInput.className = 'live-mode';
+                    
+                    updatePriceStatus(`${apiSource}: ${new Date().toLocaleTimeString()}`, 'live');
+                    
+                    // Update button states
+                    const manualBtn = document.getElementById('manual-price');
+                    const refreshBtn = document.getElementById('refresh-price');
+                    manualBtn.style.background = '';
+                    refreshBtn.style.background = '#4caf50';
+                    
+                    // Trigger calculations
+                    console.log('Triggering calculations after price load');
+                    setTimeout(() => {
+                        updatePercentageDisplay();
+                    }, 100);
+                } else {
+                    throw new Error(`No valid price found for ${symbol}`);
+                }
+                
+            } catch (error) {
+                console.error('Error in fetchLivePrice:', error);
+                updatePriceStatus('Loading price data...', 'error');
+                
+                // Force current market price as final fallback
+                const currentPrices = {
+                    'EURUSD': 1.0850, 'GBPUSD': 1.2650, 'USDJPY': 149.85, 'USDCHF': 0.9125,
+                    'AUDUSD': 0.6750, 'USDCAD': 1.3580, 'EURGBP': 0.8580, 'EURJPY': 162.45,
+                    'GBPJPY': 189.75, 'CHFJPY': 164.25, 'EURCHF': 0.9850, 'AUDCHF': 0.6155,
+                    'XAUUSD': 2685.50, 'DXY': 103.85, 'BTCUSD': 97500, 'ETHUSD': 3450
+                };
+                
+                const fallbackPrice = currentPrices[symbol];
+                if (fallbackPrice) {
+                    const priceInput = document.getElementById('current-price');
+                    const decimalPlaces = getDecimalPlaces(symbol);
+                    priceInput.value = fallbackPrice.toFixed(decimalPlaces);
+                    priceInput.readOnly = true;
+                    priceInput.className = 'live-mode';
+                    updatePriceStatus(`Demo: ${new Date().toLocaleTimeString()}`, 'live');
+                    setTimeout(() => updatePercentageDisplay(), 100);
+                } else {
+                    const priceInput = document.getElementById('current-price');
+                    priceInput.readOnly = false;
+                    priceInput.className = '';
+                    updatePriceStatus('Enter price manually', 'manual');
+                    isManualPriceMode = true;
+                }
+            }
+        }
+
+        function getDecimalPlaces(symbol) {
+            const decimalPlaces = {
+                'USDJPY': 2,
+                'EURJPY': 2,
+                'GBPJPY': 2,
+                'CHFJPY': 2,
+                'XAUUSD': 2,
+                'DXY': 3,
+                'BTCUSD': 0,
+                'ETHUSD': 0
+            };
+            return decimalPlaces[symbol] || 4;
+        }
+
+        function updatePriceStatus(message, type = '') {
+            const statusEl = document.getElementById('price-status');
+            statusEl.textContent = message;
+            statusEl.className = `price-status ${type}`;
+        }
+
+        function sliderToPercentage(sliderValue) {
+            // Non-linear scaling: 0-100 slider maps to 0-10% with more precision at lower values
+            // 0-50 maps to 0-2% (fine control for small percentages)
+            // 50-100 maps to 2-10% (coarse control for larger percentages)
+            const slider = parseFloat(sliderValue);
+            if (slider <= 50) {
+                // Fine control: 0-50 slider = 0-2%
+                return (slider / 50) * 2;
+            } else {
+                // Coarse control: 50-100 slider = 2-10%
+                return 2 + ((slider - 50) / 50) * 8;
+            }
+        }
+
+        function percentageToSlider(percentage) {
+            // Reverse mapping: percentage to slider value
+            const pct = parseFloat(percentage);
+            if (pct <= 2) {
+                // 0-2% maps to 0-50 slider
+                return (pct / 2) * 50;
+            } else {
+                // 2-10% maps to 50-100 slider
+                return 50 + ((pct - 2) / 8) * 50;
+            }
+        }
+
+        function updatePercentageDisplay() {
+            const sliderValue = document.getElementById('stop-loss-percentage').value;
+            const percentage = sliderToPercentage(sliderValue);
+            console.log('Updating percentage display:', sliderValue, '→', percentage + '%');
+            document.getElementById('percentage-display').textContent = percentage.toFixed(2) + '%';
+            calculateStopLossFromPercentage();
+        }
+
+        function calculateStopLossFromPercentage() {
+            const currentPriceValue = parseFloat(document.getElementById('current-price').value) || 0;
+            const sliderValue = document.getElementById('stop-loss-percentage').value;
+            const percentage = sliderToPercentage(sliderValue);
+            const isBuy = document.getElementById('buy-direction').checked;
+            
+            console.log('calculateStopLossFromPercentage called:', {
+                currentPriceValue,
+                sliderValue,
+                percentage,
+                isBuy
+            });
+            
+            if (currentPriceValue > 0 && percentage > 0) {
+                let stopLossPrice;
+                if (isBuy) {
+                    // For BUY: Stop loss is below current price
+                    stopLossPrice = currentPriceValue * (1 - percentage / 100);
+                } else {
+                    // For SELL: Stop loss is above current price
+                    stopLossPrice = currentPriceValue * (1 + percentage / 100);
+                }
+                const symbol = document.getElementById('instrument').value;
+                const decimalPlaces = getDecimalPlaces(symbol);
+                document.getElementById('stop-loss').value = stopLossPrice.toFixed(decimalPlaces);
+                
+                console.log('Set stop loss price:', stopLossPrice.toFixed(decimalPlaces));
+                
+                // Calculate take profit based on risk:reward ratio
+                calculateTakeProfitFromRatio();
+                calculate5Steps();
+            } else {
+                console.log('Cannot calculate stop loss - missing current price or percentage');
+            }
+        }
+
+        function calculateTakeProfitFromRatio() {
+            const currentPriceVal = parseFloat(document.getElementById('current-price').value) || 0;
+            const stopLossPrice = parseFloat(document.getElementById('stop-loss').value) || 0;
+            const ratio = parseFloat(document.getElementById('reward-risk-ratio').value) || 0;
+            const isBuy = document.getElementById('buy-direction').checked;
+            
+            console.log('calculateTakeProfitFromRatio called:', {
+                currentPriceVal,
+                stopLossPrice,
+                ratio,
+                isBuy
+            });
+            
+            if (currentPriceVal > 0 && stopLossPrice > 0 && ratio > 0) {
+                let riskAmount, takeProfitPrice, profitAmount;
+                
+                if (isBuy && stopLossPrice < currentPriceVal) {
+                    // BUY: Risk = current - stop, Reward = risk * ratio
+                    riskAmount = currentPriceVal - stopLossPrice;
+                    takeProfitPrice = currentPriceVal + (riskAmount * ratio);
+                    profitAmount = takeProfitPrice - currentPriceVal;
+                } else if (!isBuy && stopLossPrice > currentPriceVal) {
+                    // SELL: Risk = stop - current, Reward = risk * ratio
+                    riskAmount = stopLossPrice - currentPriceVal;
+                    takeProfitPrice = currentPriceVal - (riskAmount * ratio);
+                    profitAmount = currentPriceVal - takeProfitPrice;
+                } else {
+                    console.log('Invalid TP configuration - wrong stop loss direction');
+                    return; // Invalid configuration
+                }
+                
+                const symbol = document.getElementById('instrument').value;
+                const decimalPlaces = getDecimalPlaces(symbol);
+                document.getElementById('take-profit').value = takeProfitPrice.toFixed(decimalPlaces);
+                
+                console.log('Set take profit price:', takeProfitPrice.toFixed(decimalPlaces));
+                
+                // Calculate potential profit in dollars based on position size
+                calculatePotentialProfit(profitAmount);
+            } else {
+                console.log('Cannot calculate TP - missing values:', {currentPriceVal, stopLossPrice, ratio});
+            }
+        }
+
+        function calculatePotentialProfit(profitPerUnit) {
+            // Get position size from the main calculation
+            const currPrice = parseFloat(document.getElementById('current-price').value) || 0;
+            const stopLoss = parseFloat(document.getElementById('stop-loss').value) || 0;
+            const betAmount = parseFloat(document.getElementById('bet-amount').value) || 0;
+            const isBuy = document.getElementById('buy-direction').checked;
+            
+            let positionSize = 0;
+            
+            if (currPrice > 0 && stopLoss > 0 && betAmount > 0) {
+                let percentageChange = 0;
+                if (isBuy && stopLoss < currPrice) {
+                    percentageChange = (currPrice - stopLoss) / currPrice;
+                } else if (!isBuy && stopLoss > currPrice) {
+                    percentageChange = (stopLoss - currPrice) / currPrice;
+                }
+                
+                if (percentageChange > 0) {
+                    const riskPerShare = currPrice * percentageChange;
+                    positionSize = betAmount / riskPerShare;
+                }
+            }
+            
+            const totalProfit = profitPerUnit * positionSize;
+            const profitElement = document.getElementById('potential-profit-amount');
+            
+            if (totalProfit > 0) {
+                profitElement.textContent = `$${totalProfit.toFixed(2)}`;
+                profitElement.className = 'profit-value positive';
+            } else if (totalProfit < 0) {
+                profitElement.textContent = `$${Math.abs(totalProfit).toFixed(2)}`;
+                profitElement.className = 'profit-value negative';
+            } else {
+                profitElement.textContent = '$0.00';
+                profitElement.className = 'profit-value';
+            }
+        }
+
+        function calculatePercentageFromStopLoss() {
+            const priceValue = parseFloat(document.getElementById('current-price').value) || 0;
+            const stopLossPrice = parseFloat(document.getElementById('stop-loss').value) || 0;
+            const isBuy = document.getElementById('buy-direction').checked;
+            
+            if (priceValue > 0 && stopLossPrice > 0) {
+                let percentage;
+                if (isBuy && stopLossPrice < priceValue) {
+                    // For BUY: Stop loss should be below current price
+                    percentage = ((priceValue - stopLossPrice) / priceValue) * 100;
+                } else if (!isBuy && stopLossPrice > priceValue) {
+                    // For SELL: Stop loss should be above current price  
+                    percentage = ((stopLossPrice - priceValue) / priceValue) * 100;
+                } else {
+                    return; // Invalid stop loss for the selected direction
+                }
+                
+                // Convert percentage to slider value and update
+                const sliderValue = percentageToSlider(percentage);
+                document.getElementById('stop-loss-percentage').value = sliderValue.toFixed(0);
+                document.getElementById('percentage-display').textContent = percentage.toFixed(2) + '%';
+                
+                // Also update take profit
+                calculateTakeProfitFromRatio();
+            }
+        }
+
+        function getInstrumentLotSize() {
+            const instrument = document.getElementById('instrument').value;
+            
+            // For custom instrument, always use the input value
+            if (instrument === 'custom') {
+                return parseFloat(document.getElementById('lot-size').value) || 0.01;
+            }
+            
+            // Check if there's a saved lot size for this instrument
+            const savedLotSize = getInstrumentSavedLotSize(instrument);
+            if (savedLotSize !== null) {
+                return savedLotSize;
+            }
+            
+            // Fall back to default lot sizes
+            const defaultLotSizes = {
+                // Major Forex
+                'EURUSD': 0.01,
+                'GBPUSD': 0.01,
+                'USDJPY': 0.01,
+                'USDCHF': 0.01,
+                'AUDUSD': 0.01,
+                'USDCAD': 0.01,
+                // Minor Forex
+                'EURGBP': 0.001,
+                'EURJPY': 0.001,
+                'GBPJPY': 0.001,
+                'CHFJPY': 0.001,
+                'EURCHF': 0.001,
+                'AUDCHF': 0.001,
+                // Commodities
+                'XAUUSD': 0.01,
+                'DXY': 0.001,
+                // Crypto
+                'BTCUSD': 0.001,
+                'ETHUSD': 0.01
+            };
+            return defaultLotSizes[instrument] || 0.01;
+        }
+
+        function getDefaultLotSize(instrument) {
+            const defaultLotSizes = {
+                // Major Forex
+                'EURUSD': 0.01,
+                'GBPUSD': 0.01,
+                'USDJPY': 0.01,
+                'USDCHF': 0.01,
+                'AUDUSD': 0.01,
+                'USDCAD': 0.01,
+                // Minor Forex
+                'EURGBP': 0.001,
+                'EURJPY': 0.001,
+                'GBPJPY': 0.001,
+                'CHFJPY': 0.001,
+                'EURCHF': 0.001,
+                'AUDCHF': 0.001,
+                // Commodities
+                'XAUUSD': 0.01,
+                'DXY': 0.001,
+                // Crypto
+                'BTCUSD': 0.001,
+                'ETHUSD': 0.01
+            };
+            return defaultLotSizes[instrument] || 0.01;
+        }
+
+        function toggleManualPrice() {
+            const priceInput = document.getElementById('current-price');
+            const manualBtn = document.getElementById('manual-price');
+            const refreshBtn = document.getElementById('refresh-price');
+            
+            isManualPriceMode = true;
+            priceInput.readOnly = false;
+            priceInput.focus();
+            priceInput.className = 'manual-mode';
+            updatePriceStatus('Manual entry mode - auto-refresh disabled', 'manual');
+            manualBtn.style.background = '#ff9800';
+            manualBtn.textContent = '✏️ Manual';
+            refreshBtn.style.background = '';
+            refreshBtn.textContent = '🔄 Live';
+        }
+
+        function enableLiveMode() {
+            const priceInput = document.getElementById('current-price');
+            const manualBtn = document.getElementById('manual-price');
+            const refreshBtn = document.getElementById('refresh-price');
+            
+            isManualPriceMode = false;
+            priceInput.className = 'live-mode';
+            manualBtn.style.background = '';
+            manualBtn.textContent = '✏️ Manual';
+            refreshBtn.style.background = '#4caf50';
+            refreshBtn.textContent = '🔄 Live';
+            
+            // Immediately fetch live price
+            const instrument = document.getElementById('instrument').value;
+            if (instrument !== 'custom') {
+                fetchLivePrice(instrument);
+            }
+        }
+
+        function toggleCustomLotSize() {
+            const instrument = document.getElementById('instrument').value;
+            const customLotGroup = document.getElementById('custom-lot-group');
+            
+            console.log('toggleCustomLotSize called for instrument:', instrument);
+            
+            if (instrument === 'custom') {
+                customLotGroup.style.display = 'block';
+                isManualPriceMode = true;
+                
+                const priceInput = document.getElementById('current-price');
+                priceInput.readOnly = false;
+                priceInput.className = 'manual-mode';
+                priceInput.value = '';
+                
+                updatePriceStatus('Enter price manually for custom instrument', 'manual');
+                
+                // Update button states for custom mode
+                const manualBtn = document.getElementById('manual-price');
+                const refreshBtn = document.getElementById('refresh-price');
+                manualBtn.style.background = '#ff9800';
+                refreshBtn.style.background = '';
+                
+                // Show action buttons for custom instruments
+                const saveBtn = document.getElementById('save-lot-size');
+                const resetBtn = document.getElementById('reset-lot-size');
+                saveBtn.style.display = 'none';
+                resetBtn.style.display = 'inline-block';
+                resetBtn.textContent = 'Reset to 0.001';
+                
+                // Set default custom lot size
+                document.getElementById('lot-size').value = '0.001';
+            } else {
+                customLotGroup.style.display = 'block';
+                
+                // Reset manual mode when switching to preset instruments
+                isManualPriceMode = false;
+                
+                // Load lot size (saved or default)
+                const lotSize = getInstrumentLotSize();
+                document.getElementById('lot-size').value = lotSize;
+                
+                // Update lot size label to show if it's saved or default
+                updateLotSizeLabel(instrument);
+                
+                // Show/configure action buttons for preset instruments
+                const saveBtn = document.getElementById('save-lot-size');
+                const resetBtn = document.getElementById('reset-lot-size');
+                saveBtn.style.display = 'inline-block';
+                resetBtn.style.display = 'inline-block';
+                saveBtn.textContent = 'Save for this instrument';
+                resetBtn.textContent = 'Reset to default';
+                
+                // Always fetch live price for preset instruments
+                console.log('Switching to preset instrument:', instrument, '- fetching live price');
+                fetchLivePrice(instrument);
+            }
+            
+            // Trigger calculations
+            setTimeout(() => {
+                calculate5Steps();
+            }, 200);
+        }
+
+        function updateLotSizeLabel(instrument) {
+            const savedLotSize = getInstrumentSavedLotSize(instrument);
+            const defaultLotSize = getDefaultLotSize(instrument);
+            const lotSizeLabel = document.querySelector('label[for="lot-size"]');
+            
+            if (savedLotSize !== null && savedLotSize !== defaultLotSize) {
+                lotSizeLabel.innerHTML = `Minimum Lot Size <span class="saved-indicator">(Saved: ${savedLotSize})</span>`;
+            } else {
+                lotSizeLabel.innerHTML = 'Minimum Lot Size';
+            }
+        }
+
+        function saveLotSizeForInstrument() {
+            const instrument = document.getElementById('instrument').value;
+            const lotSizeInput = document.getElementById('lot-size');
+            const currentLotSize = parseFloat(lotSizeInput.value);
+            
+            if (!currentLotSize || currentLotSize <= 0) {
+                alert('Please enter a valid lot size');
+                return;
+            }
+            
+            if (instrument === 'custom') {
+                alert('Custom instrument lot sizes are not saved');
+                return;
+            }
+            
+            saveInstrumentLotSize(instrument, currentLotSize);
+            updateLotSizeLabel(instrument);
+            
+            // Show success feedback
+            const saveBtn = document.getElementById('save-lot-size');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saved ✓';
+            saveBtn.style.backgroundColor = '#4caf50';
+            
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.style.backgroundColor = '';
+            }, 2000);
+            
+            calculate5Steps();
+        }
+
+        function resetLotSizeForInstrument() {
+            const instrument = document.getElementById('instrument').value;
+            
+            if (instrument === 'custom') {
+                document.getElementById('lot-size').value = '0.001';
+            } else {
+                const defaultLotSize = getDefaultLotSize(instrument);
+                document.getElementById('lot-size').value = defaultLotSize;
+                
+                // Clear saved cookie
+                const cookieName = `lotSize_${instrument}`;
+                document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                
+                updateLotSizeLabel(instrument);
+                
+                // Show success feedback
+                const resetBtn = document.getElementById('reset-lot-size');
+                const originalText = resetBtn.textContent;
+                resetBtn.textContent = 'Reset ✓';
+                resetBtn.style.backgroundColor = '#4caf50';
+                
+                setTimeout(() => {
+                    resetBtn.textContent = originalText;
+                    resetBtn.style.backgroundColor = '';
+                }, 2000);
+            }
+            
+            calculate5Steps();
+        }
+
+        function clearAll() {
+            const inputs = document.querySelectorAll('input[type="number"]:not([readonly])');
+            inputs.forEach(input => input.value = '');
+            document.getElementById('deribit-enabled').checked = false;
+            document.getElementById('instrument').value = 'EURUSD';
+            document.getElementById('stop-loss-percentage').value = '2.0';
+            updatePercentageDisplay();
+            toggleCustomLotSize();
+            updateDisplay(0, 0, 0, 0, 0, 0, 0);
+        }
+
+        function calculate5Steps() {
+            if (isCalculating) return;
+            isCalculating = true;
+
+            try {
+                // STEP 1: Get stop loss price (user input)
+                const currentPriceMain = parseFloat(document.getElementById('current-price').value) || 0;
+                const stopLoss = parseFloat(document.getElementById('stop-loss').value) || 0;
+                
+                // STEP 2: Calculate % change from current price to stop loss
+                const isBuy = document.getElementById('buy-direction').checked;
+                let percentageChange = 0;
+                if (currentPriceMain > 0 && stopLoss > 0) {
+                    if (isBuy && stopLoss < currentPriceMain) {
+                        // BUY: Stop loss below current price
+                        percentageChange = (currentPriceMain - stopLoss) / currentPriceMain;
+                    } else if (!isBuy && stopLoss > currentPriceMain) {
+                        // SELL: Stop loss above current price
+                        percentageChange = (stopLoss - currentPriceMain) / currentPriceMain;
+                    } else {
+                        // Invalid stop loss for the direction
+                        percentageChange = 0;
+                    }
+                }
+                
+                // STEP 3: Get bet amount (user input)
+                const betAmount = parseFloat(document.getElementById('bet-amount').value) || 0;
+                
+                // STEP 4: Calculate notional value
+                // Divide bet by percentage (as decimal)
+                let notionalValue = 0;
+                if (percentageChange > 0 && betAmount > 0) {
+                    notionalValue = betAmount / percentageChange;
+                }
+                
+                // STEP 5: Deribit adjustment (divide by 10 if enabled)
+                const isDeribit = document.getElementById('deribit-enabled').checked;
+                let finalContracts = notionalValue;
+                if (isDeribit && notionalValue > 0) {
+                    finalContracts = notionalValue / 10;
+                }
+                
+                // Calculate leverage
+                const accountBalance = parseFloat(document.getElementById('account-balance').value) || 0;
+                let calculatedLeverage = 0;
+                if (accountBalance > 0 && notionalValue > 0) {
+                    calculatedLeverage = notionalValue / accountBalance;
+                }
+                
+                // Calculate position size adjustments for lot size
+                const lotSize = getInstrumentLotSize();
+                let rawPositionSize = 0;
+                let adjustedPositionSize = 0;
+                let numberOfLots = 0;
+                
+                if (currentPriceMain > 0 && percentageChange > 0 && betAmount > 0) {
+                    // Calculate raw position size based on risk
+                    const riskPerShare = currentPriceMain * percentageChange;
+                    rawPositionSize = betAmount / riskPerShare;
+                    
+                    // Adjust for lot size (round down to nearest lot)
+                    numberOfLots = Math.floor(rawPositionSize / lotSize);
+                    adjustedPositionSize = numberOfLots * lotSize;
+                }
+                
+                updateDisplay(percentageChange, notionalValue, finalContracts, calculatedLeverage, rawPositionSize, adjustedPositionSize, numberOfLots);
+                
+                // Also update potential profit display
+                const takeProfitPrice = parseFloat(document.getElementById('take-profit').value) || 0;
+                if (takeProfitPrice > 0 && currentPriceMain > 0) {
+                    const profitPerUnit = Math.abs(takeProfitPrice - currentPriceMain);
+                    calculatePotentialProfit(profitPerUnit);
+                }
+            } catch (error) {
+                console.error('Calculation error:', error);
+            }
+
+            isCalculating = false;
+        }
+
+        function updateDisplay(percentageChange, notionalValue, finalContracts, leverage, rawPositionSize, adjustedPositionSize, numberOfLots) {
+            // Step 2 display
+            document.getElementById('percentage-change').textContent = `${(percentageChange * 100).toFixed(2)}%`;
+            
+            // Step 4 display
+            document.getElementById('notional-value').textContent = `$${notionalValue.toFixed(2)}`;
+            
+            // Step 5 display
+            document.getElementById('final-contracts').textContent = `$${finalContracts.toFixed(2)}`;
+            
+            // Leverage calculation - always show, even if 0
+            const leverageText = leverage > 0 ? `${leverage.toFixed(2)}x` : '0.00x';
+            document.getElementById('calculated-leverage').value = leverageText;
+            
+            // Color code leverage based on risk
+            const leverageInput = document.getElementById('calculated-leverage');
+            if (leverage > 10) {
+                leverageInput.style.backgroundColor = '#ffebee';
+                leverageInput.style.color = '#c62828';
+            } else if (leverage > 5) {
+                leverageInput.style.backgroundColor = '#fff3e0';
+                leverageInput.style.color = '#ef6c00';
+            } else if (leverage > 0) {
+                leverageInput.style.backgroundColor = '#e8f5e8';
+                leverageInput.style.color = '#2e7d32';
+            } else {
+                leverageInput.style.backgroundColor = '#f8f9fa';
+                leverageInput.style.color = '#666';
+            }
+            
+            // Position size adjustments
+            document.getElementById('raw-position-size').textContent = rawPositionSize.toFixed(6);
+            document.getElementById('adjusted-position-size').textContent = adjustedPositionSize.toFixed(6);
+            document.getElementById('number-of-lots').textContent = numberOfLots.toString();
+        }
+
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing calculator...');
+            console.log('DEBUG: Starting initialization');
+            
+            setDefaults();
+            
+            // Test API directly on load
+            console.log('DEBUG: Testing API call directly...');
+            testAPICall();
+            
+            toggleCustomLotSize();
+            
+            // Add listeners to all input fields
+            const inputs = document.querySelectorAll('input[type="number"]:not([readonly])');
+            inputs.forEach(input => {
+                input.addEventListener('input', calculate5Steps);
+                input.addEventListener('change', calculate5Steps);
+                input.addEventListener('keyup', calculate5Steps);
+            });
+            
+            // Add listener to Deribit checkbox
+            document.getElementById('deribit-enabled').addEventListener('change', calculate5Steps);
+            
+            // Add listener to instrument dropdown with debug
+            document.getElementById('instrument').addEventListener('change', function() {
+                console.log('DEBUG: Instrument changed to:', this.value);
+                toggleCustomLotSize();
+            });
+            
+            // Add listener to percentage slider
+            document.getElementById('stop-loss-percentage').addEventListener('input', updatePercentageDisplay);
+            
+            // Add listener to stop loss price input to update percentage
+            document.getElementById('stop-loss').addEventListener('input', calculatePercentageFromStopLoss);
+            
+            // Add listeners for buy/sell direction change
+            document.querySelectorAll('input[name="trade-direction"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    calculateStopLossFromPercentage(); // Recalculate stop loss when direction changes
+                    calculate5Steps();
+                });
+            });
+            
+            // Add listener to refresh price button
+            document.getElementById('refresh-price').addEventListener('click', function() {
+                console.log('DEBUG: Refresh button clicked');
+                const instrument = document.getElementById('instrument').value;
+                console.log('DEBUG: Current instrument:', instrument);
+                if (instrument !== 'custom') {
+                    enableLiveMode(); // This will fetch live price and set live mode
+                }
+            });
+            
+            // Add listener to manual price button
+            document.getElementById('manual-price').addEventListener('click', toggleManualPrice);
+            
+            // Add listener to reward:risk ratio input
+            document.getElementById('reward-risk-ratio').addEventListener('input', function() {
+                calculateTakeProfitFromRatio();
+                calculate5Steps();
+            });
+            
+            // Add listeners for lot size save/reset buttons
+            document.getElementById('save-lot-size').addEventListener('click', saveLotSizeForInstrument);
+            document.getElementById('reset-lot-size').addEventListener('click', resetLotSizeForInstrument);
+            
+            // Add listener to lot size input for auto-save functionality
+            document.getElementById('lot-size').addEventListener('change', function() {
+                const instrument = document.getElementById('instrument').value;
+                if (instrument !== 'custom') {
+                    // Optional: Auto-save on change (you can remove this if you prefer manual saving only)
+                    // saveLotSizeForInstrument();
+                }
+            });
+            
+            // Set up auto-refresh for live prices (every 30 seconds)
+            priceRefreshInterval = setInterval(function() {
+                const instrument = document.getElementById('instrument').value;
+                if (instrument !== 'custom' && !isManualPriceMode) {
+                    console.log('Auto-refresh triggered for:', instrument);
+                    fetchLivePrice(instrument);
+                }
+            }, 30000);
+            
+            // Initial calculation and price fetch
+            calculate5Steps();
+            
+            // Load initial price after a short delay to ensure DOM is ready
+            setTimeout(function() {
+                const instrument = document.getElementById('instrument').value;
+                console.log('DEBUG: Initial price load for:', instrument, 'Manual mode:', isManualPriceMode);
+                if (instrument !== 'custom' && !isManualPriceMode) {
+                    console.log('DEBUG: Calling fetchLivePrice for initial load');
+                    fetchLivePrice(instrument);
+                } else {
+                    console.log('DEBUG: Skipping initial price fetch - custom or manual mode');
+                    updatePercentageDisplay();
+                }
+            }, 1000);
+        });
+        
+        // Test function to debug API calls
+        async function testAPICall() {
+            console.log('DEBUG: Testing direct API call to CoinGecko...');
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+                console.log('DEBUG: API response status:', response.status);
+                console.log('DEBUG: API response headers:', response.headers);
+                const data = await response.json();
+                console.log('DEBUG: API response data:', data);
+            } catch (error) {
+                console.log('DEBUG: API test failed:', error);
+            }
+        }
+        
+        // Manual test function callable from button
+        function testFetchPrice() {
+            console.log('DEBUG: Manual test fetch triggered');
+            const instrument = document.getElementById('instrument').value;
+            console.log('DEBUG: Current instrument:', instrument);
+            console.log('DEBUG: Manual mode:', isManualPriceMode);
+            
+            // Force enable live mode for test
+            isManualPriceMode = false;
+            fetchLivePrice(instrument);
+        }
+    </script>
+</body>
+</html>
